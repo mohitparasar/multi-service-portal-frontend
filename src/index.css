@@ -1,44 +1,18 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply m-0 bg-msp-background font-sans text-msp-text antialiased; }
+  button, input, select, textarea { font: inherit; }
 }
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  min-width: 320px;
-  min-height: 100vh;
-  overflow-x: hidden;
-
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
-  background: #0b2239;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
-
-button {
-  border: none;
-}
-
-#root {
-  min-height: 100vh;
+@layer components {
+  .page-shell { @apply mx-auto w-[min(1180px,90%)] py-14; }
+  .eyebrow { @apply text-xs font-bold uppercase tracking-[0.18em] text-msp-accent; }
+  .display-title { @apply font-display text-4xl font-bold leading-tight text-msp-primary md:text-5xl; }
+  .btn-primary { @apply inline-flex items-center justify-center rounded-lg bg-msp-primary px-6 py-3 font-bold text-white transition hover:-translate-y-0.5 hover:bg-msp-accent focus:outline-none focus:ring-4 focus:ring-msp-accent/20; }
+  .btn-secondary { @apply inline-flex items-center justify-center rounded-lg border border-msp-primary px-6 py-3 font-bold text-msp-primary transition hover:bg-msp-primary hover:text-white; }
+  .field { @apply w-full rounded-lg border border-[#cfddda] bg-[#f3f7f6] px-4 py-3 outline-none transition placeholder:text-msp-muted/70 focus:border-msp-accent focus:ring-4 focus:ring-msp-accent/10; }
+  .card { @apply rounded-2xl border border-msp-border bg-white shadow-msp; }
 }

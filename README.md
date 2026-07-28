@@ -1,16 +1,66 @@
-# React + Vite
+# MSP Frontend — Tailwind + Context API
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Production-oriented frontend starter aligned with the Multi-Service Portal backend.
 
-Currently, two official plugins are available:
+## Main flow
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Public landing page: navbar, hero, services, about and contact.
+- Provider search is available only inside the CUSTOMER protected area.
+- Registration fields: email, password, confirm password and role (CUSTOMER/PROVIDER).
+- Login redirects CUSTOMER, PROVIDER and ADMIN to their own dashboards.
+- Customer creates a booking through `POST /api/bookings`.
+- Customer dashboard reads `GET /api/bookings/customer`.
+- Provider dashboard reads `GET /api/bookings/provider` and can update status.
+- API failures render a safe retry panel instead of breaking the page.
 
-## React Compiler
+## Important backend security change
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The current API Gateway whitelist allows `/api/providers/search` publicly. The frontend hides it behind login, but real security must also remove that path from the gateway public whitelist.
 
-## Expanding the Oxlint configuration
+## Run
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Windows CMD:
+
+```bat
+copy .env.example .env
+npm run dev
+```
+
+## Gateway
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+## Expected auth login response
+
+```json
+{
+  "accessToken": "...",
+  "userId": 1,
+  "email": "user@example.com",
+  "role": "CUSTOMER"
+}
+```
+
+The refresh-token cookie is sent using Axios `withCredentials: true`.
+
+## Current MSP flow
+
+- Provider discovery at `/providers` is public.
+- Login is required only when a visitor chooses **Book now**.
+- The selected provider is preserved through login and restored on the booking form.
+- Customer bookings are loaded from `/api/bookings/customer`.
+- Provider bookings are loaded from `/api/bookings/provider`.
+- Dashboard sidebars include **Return to website** and logout navigation.
+- API failures show retryable, user-friendly service messages instead of breaking the page.
+
+## Backend expectations
+
+Keep `GET /api/providers/search` public in the API Gateway. Booking, customer, provider, and admin endpoints should remain JWT protected. The frontend calls the gateway configured by `VITE_API_BASE_URL` and sends refresh cookies with `withCredentials: true`.

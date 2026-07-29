@@ -1,0 +1,1 @@
+export default function PlaceholderPage({title,description='This module is ready for API integration.'}){return <div><p className="eyebrow">MSP MODULE</p><h1 className="mt-3 display-title">{title}</h1><p className="mt-4 text-msp-secondary">{description}</p><div className="card mt-8 p-8 text-msp-muted">The route, layout and folder structure are already configured.</div></div>}

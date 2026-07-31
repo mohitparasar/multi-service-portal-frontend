@@ -3,6 +3,7 @@ import {
   CalendarCheck,
   ShieldCheck,
 } from "lucide-react";
+
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
@@ -27,6 +28,7 @@ export default function CreateBooking() {
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
+    // Keep IDs internally because the backend requires them.
     providerId:
       provider?.providerId ||
       provider?.id ||
@@ -34,6 +36,17 @@ export default function CreateBooking() {
 
     categoryId:
       provider?.categoryId ||
+      "",
+
+    // Display values
+    providerName:
+      provider?.fullName ||
+      provider?.providerName ||
+      "",
+
+    categoryName:
+      provider?.categoryName ||
+      provider?.serviceName ||
       "",
 
     serviceAddress: "",
@@ -50,8 +63,8 @@ export default function CreateBooking() {
   });
 
   const missingProvider = useMemo(
-    () => !form.providerId,
-    [form.providerId]
+    () => !form.providerId || !form.categoryId,
+    [form.providerId, form.categoryId]
   );
 
   const handleChange = (event) => {
@@ -164,15 +177,6 @@ export default function CreateBooking() {
     try {
       setSaving(true);
 
-      /*
-       * Use the method name that exists in bookingApi.js.
-       *
-       * Preferred:
-       * bookingApi.createBooking(payload)
-       *
-       * If your method is named create, use:
-       * bookingApi.create(payload)
-       */
       await bookingApi.create(payload);
 
       toast.success(
@@ -259,27 +263,44 @@ export default function CreateBooking() {
             </div>
           )}
 
+          {(fieldErrors.providerId ||
+            fieldErrors.categoryId) && (
+            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
+              <p className="font-semibold text-red-700">
+                Provider information is incomplete
+              </p>
+
+              {fieldErrors.providerId && (
+                <p className="mt-1 text-sm text-red-600">
+                  {fieldErrors.providerId}
+                </p>
+              )}
+
+              {fieldErrors.categoryId && (
+                <p className="mt-1 text-sm text-red-600">
+                  {fieldErrors.categoryId}
+                </p>
+              )}
+            </div>
+          )}
+
           <form
             onSubmit={submit}
             className="card mt-7 grid gap-5 p-6 md:grid-cols-2"
           >
             <FormField
-              label="Provider ID"
-              name="providerId"
-              type="number"
-              value={form.providerId}
-              onChange={handleChange}
-              error={fieldErrors.providerId}
+              label="Provider Name"
+              name="providerName"
+              type="text"
+              value={form.providerName}
               readOnly
             />
 
             <FormField
-              label="Category ID"
-              name="categoryId"
-              type="number"
-              value={form.categoryId}
-              onChange={handleChange}
-              error={fieldErrors.categoryId}
+              label="Category"
+              name="categoryName"
+              type="text"
+              value={form.categoryName}
               readOnly
             />
 
@@ -290,6 +311,7 @@ export default function CreateBooking() {
               value={form.city}
               onChange={handleChange}
               error={fieldErrors.city}
+              placeholder="Enter city"
             />
 
             <FormField
@@ -299,6 +321,7 @@ export default function CreateBooking() {
               value={form.state}
               onChange={handleChange}
               error={fieldErrors.state}
+              placeholder="Enter state"
             />
 
             <FormField
@@ -337,7 +360,6 @@ export default function CreateBooking() {
               name="estimatedPrice"
               type="number"
               value={form.estimatedPrice}
-              onChange={handleChange}
               error={fieldErrors.estimatedPrice}
               readOnly
             />
@@ -388,10 +410,14 @@ export default function CreateBooking() {
           </p>
 
           <h2 className="mt-3 font-display text-2xl font-bold text-msp-primary">
-            {provider?.fullName ||
-              provider?.providerName ||
+            {form.providerName ||
               "Provider details unavailable"}
           </h2>
+
+          <p className="mt-2 text-sm font-semibold text-msp-accent">
+            {form.categoryName ||
+              "Category unavailable"}
+          </p>
 
           <p className="mt-2 text-sm text-msp-secondary">
             {provider?.city || "Service area"} ·{" "}

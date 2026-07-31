@@ -1,12 +1,12 @@
 import {
-    CalendarDays,
-    FileCheck2,
-    Heart,
-    MapPin,
-    Search,
-    UserRound,
-    Users,
-    Wrench,
+  CalendarDays,
+  FileCheck2,
+  Heart,
+  MapPin,
+  Search,
+  UserRound,
+  Users,
+  Wrench,
 } from "lucide-react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
@@ -22,6 +22,7 @@ import CustomerAddresses from "./pages/customer/CustomerAddresses";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import CustomerFavorites from "./pages/customer/CustomerFavorites";
 import CustomerProfile from "./pages/customer/CustomerProfile";
+import Payment from "./pages/customer/Payment";
 import ProviderSearch from "./pages/customer/ProviderSearch";
 
 import ProviderAddresses from "./pages/provider/ProviderAddresses";
@@ -44,271 +45,275 @@ import RoleRoute from "./routes/RoleRoute";
 import { ROLES } from "./utils/roles";
 
 export default function App() {
-    return (
-        <Routes>
-            {/* Public Routes */}
-            <Route element={<PublicLayout />}>
-                <Route index element={<Home />} />
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route element={<PublicLayout />}>
+        <Route index element={<Home />} />
 
-                <Route path="services" element={<Services />} />
+        <Route path="services" element={<Services />} />
 
-                <Route path="providers" element={<Providers />} />
+        <Route path="providers" element={<Providers />} />
 
-                <Route path="contact" element={<Contact />} />
+        <Route path="contact" element={<Contact />} />
 
-                <Route path="login" element={<Login />} />
+        <Route path="login" element={<Login />} />
 
-                <Route path="register" element={<Register />} />
-            </Route>
+        <Route path="register" element={<Register />} />
+      </Route>
 
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-                {/* Customer */}
-                <Route
-                    element={
-                        <RoleRoute allowedRoles={[ROLES.CUSTOMER]} />
-                    }
-                >
-                    <Route
-                        path="customer"
-                        element={
-                            <DashboardLayout
-                                title="Customer account"
-                                links={[
-                                    {
-                                        to: "profile",
-                                        label: "Profile",
-                                        icon: UserRound,
-                                    },
-                                    {
-                                        to: "/providers",
-                                        label: "Find providers",
-                                        icon: Search,
-                                    },
-                                    {
-                                        to: "bookings",
-                                        label: "Bookings",
-                                        icon: CalendarDays,
-                                    },
-                                    {
-                                        to: "addresses",
-                                        label: "Addresses",
-                                        icon: MapPin,
-                                    },
-                                    {
-                                        to: "favorites",
-                                        label: "Favorites",
-                                        icon: Heart,
-                                    },
-                                ]}
-                            />
-                        }
-                    >
-                        <Route
-                            index
-                            element={
-                                <Navigate
-                                    to="dashboard"
-                                    replace
-                                />
-                            }
-                        />
-
-                        <Route
-                            path="dashboard"
-                            element={<CustomerDashboard />}
-                        />
-
-                        <Route
-                            path="profile"
-                            element={<CustomerProfile />}
-                        />
-
-                        <Route
-                            path="search"
-                            element={<ProviderSearch />}
-                        />
-
-                        <Route
-                            path="bookings"
-                            element={<CustomerBookings />}
-                        />
-
-                        <Route
-                            path="bookings/new"
-                            element={<CreateBooking />}
-                        />
-
-                        <Route
-                            path="addresses"
-                            element={<CustomerAddresses />}
-                        />
-
-                        <Route
-                            path="favorites"
-                            element={<CustomerFavorites />}
-                        />
-                    </Route>
-                </Route>
-
-                {/* Provider */}
-                <Route
-                    element={
-                        <RoleRoute allowedRoles={[ROLES.PROVIDER]} />
-                    }
-                >
-                    <Route
-                        path="provider"
-                        element={
-                            <DashboardLayout
-                                title="Provider account"
-                                links={[
-                                    {
-                                        to: "profile",
-                                        label: "Profile",
-                                        icon: UserRound,
-                                    },
-                                    {
-                                        to: "skills",
-                                        label: "Skills & pricing",
-                                        icon: Wrench,
-                                    },
-                                    {
-                                        to: "addresses",
-                                        label: "Service areas",
-                                        icon: MapPin,
-                                    },
-                                    {
-                                        to: "documents",
-                                        label: "Documents",
-                                        icon: FileCheck2,
-                                    },
-                                    {
-                                        to: "bookings",
-                                        label: "Bookings",
-                                        icon: CalendarDays,
-                                    },
-                                ]}
-                            />
-                        }
-                    >
-                        <Route
-                            index
-                            element={
-                                <Navigate
-                                    to="dashboard"
-                                    replace
-                                />
-                            }
-                        />
-
-                        <Route
-                            path="dashboard"
-                            element={<ProviderDashboard />}
-                        />
-
-                        <Route
-                            path="profile"
-                            element={<ProviderProfile />}
-                        />
-
-                        <Route
-                            path="skills"
-                            element={<ProviderSkills />}
-                        />
-
-                        <Route
-                            path="addresses"
-                            element={<ProviderAddresses />}
-                        />
-
-                        <Route
-                            path="documents"
-                            element={<ProviderDocuments />}
-                        />
-
-                        <Route
-                            path="bookings"
-                            element={<ProviderBookings />}
-                        />
-                    </Route>
-                </Route>
-
-                {/* Admin */}
-                <Route
-                    element={
-                        <RoleRoute allowedRoles={[ROLES.ADMIN]} />
-                    }
-                >
-                    <Route
-                        path="admin"
-                        element={
-                            <DashboardLayout
-                                title="Administration"
-                                links={[
-                                    {
-                                        to: "providers",
-                                        label: "Providers",
-                                        icon: Users,
-                                    },
-                                    {
-                                        to: "documents",
-                                        label: "Documents",
-                                        icon: FileCheck2,
-                                    },
-                                    {
-                                        to: "categories",
-                                        label: "Categories",
-                                        icon: Wrench,
-                                    },
-                                ]}
-                            />
-                        }
-                    >
-                        <Route
-                            index
-                            element={
-                                <Navigate
-                                    to="dashboard"
-                                    replace
-                                />
-                            }
-                        />
-
-                        <Route
-                            path="dashboard"
-                            element={<AdminDashboard />}
-                        />
-
-                        <Route
-                            path="providers"
-                            element={
-                                <PlaceholderPage title="Pending providers" />
-                            }
-                        />
-
-                        <Route
-                            path="documents"
-                            element={
-                                <PlaceholderPage title="Pending documents" />
-                            }
-                        />
-
-                        <Route
-                            path="categories"
-                            element={
-                                <PlaceholderPage title="Service categories" />
-                            }
-                        />
-                    </Route>
-                </Route>
-            </Route>
-
-            {/* Fallback */}
+      {/* Protected Routes */}
+      <Route element={<ProtectedRoute />}>
+        {/* Customer */}
+        <Route
+          element={
+            <RoleRoute allowedRoles={[ROLES.CUSTOMER]} />
+          }
+        >
+          <Route
+            path="customer"
+            element={
+              <DashboardLayout
+                title="Customer account"
+                links={[
+                  {
+                    to: "profile",
+                    label: "Profile",
+                    icon: UserRound,
+                  },
+                  {
+                    to: "/providers",
+                    label: "Find providers",
+                    icon: Search,
+                  },
+                  {
+                    to: "bookings",
+                    label: "Bookings",
+                    icon: CalendarDays,
+                  },
+                  {
+                    to: "addresses",
+                    label: "Addresses",
+                    icon: MapPin,
+                  },
+                  {
+                    to: "favorites",
+                    label: "Favorites",
+                    icon: Heart,
+                  },
+                ]}
+              />
+            }
+          >
             <Route
-                path="*"
-                element={<Navigate to="/" replace />}
+              index
+              element={
+                <Navigate
+                  to="dashboard"
+                  replace
+                />
+              }
             />
-        </Routes>
-    );
+
+            <Route
+              path="dashboard"
+              element={<CustomerDashboard />}
+            />
+
+            <Route
+              path="profile"
+              element={<CustomerProfile />}
+            />
+
+            <Route
+              path="search"
+              element={<ProviderSearch />}
+            />
+
+            <Route
+              path="bookings"
+              element={<CustomerBookings />}
+            />
+
+            <Route
+              path="bookings/new"
+              element={<CreateBooking />}
+            />
+            <Route
+              path="/customer/bookings/:bookingId/payment"
+              element={<Payment />}
+            />
+
+            <Route
+              path="addresses"
+              element={<CustomerAddresses />}
+            />
+
+            <Route
+              path="favorites"
+              element={<CustomerFavorites />}
+            />
+          </Route>
+        </Route>
+
+        {/* Provider */}
+        <Route
+          element={
+            <RoleRoute allowedRoles={[ROLES.PROVIDER]} />
+          }
+        >
+          <Route
+            path="provider"
+            element={
+              <DashboardLayout
+                title="Provider account"
+                links={[
+                  {
+                    to: "profile",
+                    label: "Profile",
+                    icon: UserRound,
+                  },
+                  {
+                    to: "skills",
+                    label: "Skills & pricing",
+                    icon: Wrench,
+                  },
+                  {
+                    to: "addresses",
+                    label: "Service areas",
+                    icon: MapPin,
+                  },
+                  {
+                    to: "documents",
+                    label: "Documents",
+                    icon: FileCheck2,
+                  },
+                  {
+                    to: "bookings",
+                    label: "Bookings",
+                    icon: CalendarDays,
+                  },
+                ]}
+              />
+            }
+          >
+            <Route
+              index
+              element={
+                <Navigate
+                  to="dashboard"
+                  replace
+                />
+              }
+            />
+
+            <Route
+              path="dashboard"
+              element={<ProviderDashboard />}
+            />
+
+            <Route
+              path="profile"
+              element={<ProviderProfile />}
+            />
+
+            <Route
+              path="skills"
+              element={<ProviderSkills />}
+            />
+
+            <Route
+              path="addresses"
+              element={<ProviderAddresses />}
+            />
+
+            <Route
+              path="documents"
+              element={<ProviderDocuments />}
+            />
+
+            <Route
+              path="bookings"
+              element={<ProviderBookings />}
+            />
+          </Route>
+        </Route>
+
+        {/* Admin */}
+        <Route
+          element={
+            <RoleRoute allowedRoles={[ROLES.ADMIN]} />
+          }
+        >
+          <Route
+            path="admin"
+            element={
+              <DashboardLayout
+                title="Administration"
+                links={[
+                  {
+                    to: "providers",
+                    label: "Providers",
+                    icon: Users,
+                  },
+                  {
+                    to: "documents",
+                    label: "Documents",
+                    icon: FileCheck2,
+                  },
+                  {
+                    to: "categories",
+                    label: "Categories",
+                    icon: Wrench,
+                  },
+                ]}
+              />
+            }
+          >
+            <Route
+              index
+              element={
+                <Navigate
+                  to="dashboard"
+                  replace
+                />
+              }
+            />
+
+            <Route
+              path="dashboard"
+              element={<AdminDashboard />}
+            />
+
+            <Route
+              path="providers"
+              element={
+                <PlaceholderPage title="Pending providers" />
+              }
+            />
+
+            <Route
+              path="documents"
+              element={
+                <PlaceholderPage title="Pending documents" />
+              }
+            />
+
+            <Route
+              path="categories"
+              element={
+                <PlaceholderPage title="Service categories" />
+              }
+            />
+          </Route>
+        </Route>
+      </Route>
+
+      {/* Fallback */}
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
+    </Routes>
+  );
 }

@@ -1,11 +1,53 @@
-import api from './axiosInstance'
+import api from "./axiosInstance";
+
 export const bookingApi = {
-  create: (payload) => api.post('/api/bookings', payload),
-  getById: (bookingId) => api.get(`/api/bookings/${bookingId}`),
-  getCustomerBookings: () => api.get('/api/bookings/customer'),
-  getProviderBookings: () => api.get('/api/bookings/provider'),
-  cancel: (bookingId, payload) => api.put(`/api/bookings/${bookingId}/cancel`, payload),
-  reschedule: (bookingId, payload) => api.put(`/api/bookings/${bookingId}/reschedule`, payload),
-  updateStatus: (bookingId, status) => api.put(`/api/bookings/${bookingId}/status`, { status }),
-  updatePayment: (bookingId, paymentStatus) => api.put(`/api/bookings/${bookingId}/payment`, { paymentStatus })
-}
+  // =========================
+  // Customer Booking APIs
+  // =========================
+
+  create: (payload) =>
+    api.post("/api/bookings", payload),
+
+  getById: (bookingId) =>
+    api.get(`/api/bookings/${bookingId}`),
+
+  getCustomerBookings: () =>
+    api.get("/api/bookings/my"),
+
+  cancel: (bookingId, payload) =>
+    api.put(
+      `/api/bookings/${bookingId}/cancel`,
+      payload
+    ),
+
+
+  reschedule: (bookingId, payload) =>
+    api.put(`/api/bookings/${bookingId}/reschedule`, payload),
+
+  updatePayment: (bookingId, paymentStatus) =>
+    api.put(`/api/bookings/${bookingId}/payment`, {
+      paymentStatus,
+    }),
+
+  // =========================
+  // Provider Booking APIs
+  // =========================
+
+  getProviderBookings: () =>
+    api.get("/api/provider/bookings"),
+
+  getPendingBookings: () =>
+    api.get("/api/provider/bookings/pending"),
+
+  acceptBooking: (bookingId) =>
+    api.put(`/api/provider/bookings/${bookingId}/accept`),
+
+  rejectBooking: (bookingId, payload) =>
+    api.put(`/api/provider/bookings/${bookingId}/reject`, payload),
+
+  startBooking: (bookingId) =>
+    api.put(`/api/provider/bookings/${bookingId}/start`),
+
+  completeBooking: (bookingId) =>
+    api.put(`/api/provider/bookings/${bookingId}/complete`),
+};

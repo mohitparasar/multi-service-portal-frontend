@@ -2,6 +2,16 @@
 
 Production-oriented frontend starter aligned with the Multi-Service Portal backend.
 
+## Provider service integration
+
+The provider dashboard now connects to the provider-service routes through the
+API Gateway. It includes profile create/read/update, skills and pricing CRUD
+with live service categories, service-address CRUD, multipart document upload
+and management, and public provider search.
+
+Start the backend in this order: Eureka Server, Auth Service, User Service,
+Provider Service, Booking Service, Notification Service, and API Gateway.
+
 ## Main flow
 
 - Public landing page: navbar, hero, services, about and contact.

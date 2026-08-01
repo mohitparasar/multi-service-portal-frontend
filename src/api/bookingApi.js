@@ -20,14 +20,18 @@ export const bookingApi = {
       payload
     ),
 
-
   reschedule: (bookingId, payload) =>
-    api.put(`/api/bookings/${bookingId}/reschedule`, payload),
+    api.put(
+      `/api/bookings/${bookingId}/reschedule`,
+      payload
+    ),
 
-  updatePayment: (bookingId, paymentStatus) =>
-    api.put(`/api/bookings/${bookingId}/payment`, {
-      paymentStatus,
-    }),
+  // Payment API
+  updatePayment: (bookingId, payload) =>
+    api.put(
+      `/api/bookings/${bookingId}/payment`,
+      payload
+    ),
 
   // =========================
   // Provider Booking APIs
@@ -40,14 +44,23 @@ export const bookingApi = {
     api.get("/api/provider/bookings/pending"),
 
   acceptBooking: (bookingId) =>
-    api.put(`/api/provider/bookings/${bookingId}/accept`),
+    api.put(
+      `/api/provider/bookings/${bookingId}/accept`
+    ),
 
   rejectBooking: (bookingId, payload) =>
-    api.put(`/api/provider/bookings/${bookingId}/reject`, payload),
+    api.put(
+      `/api/provider/bookings/${bookingId}/reject`,
+      payload
+    ),
 
   startBooking: (bookingId) =>
-    api.put(`/api/provider/bookings/${bookingId}/start`),
+    api.put(
+      `/api/provider/bookings/${bookingId}/start`
+    ),
 
   completeBooking: (bookingId) =>
-    api.put(`/api/provider/bookings/${bookingId}/complete`),
+    api.put(
+      `/api/provider/bookings/${bookingId}/complete`
+    ),
 };

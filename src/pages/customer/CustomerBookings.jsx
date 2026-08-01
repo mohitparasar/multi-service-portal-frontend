@@ -1,6 +1,3 @@
-import { Link } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import {
   CalendarDays,
   Clock3,
@@ -10,25 +7,46 @@ import {
   X,
 } from "lucide-react";
 
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
+import toast from "react-hot-toast";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
 import { bookingApi } from "../../api/bookingApi";
 import ApiState from "../../components/common/ApiState";
 import EmptyState from "../../components/common/EmptyState";
 import { getApiErrorMessage } from "../../utils/apiError";
 
 export default function CustomerBookings() {
+  const navigate = useNavigate();
+
   const [items, setItems] = useState([]);
-  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedBooking, setSelectedBooking] =
+    useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [actionLoadingId, setActionLoadingId] = useState(null);
+
+  const [
+    actionLoadingId,
+    setActionLoadingId,
+  ] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
-      const { data } = await bookingApi.getCustomerBookings();
+      const { data } =
+        await bookingApi.getCustomerBookings();
 
       const bookings =
         data?.data?.content ||
@@ -38,8 +56,17 @@ export default function CustomerBookings() {
         data ||
         [];
 
-      setItems(Array.isArray(bookings) ? bookings : []);
+      setItems(
+        Array.isArray(bookings)
+          ? bookings
+          : []
+      );
     } catch (error) {
+      console.error(
+        "Load customer bookings error:",
+        error.response?.data || error
+      );
+
       setError(
         getApiErrorMessage(
           error,
@@ -59,9 +86,17 @@ export default function CustomerBookings() {
     booking?.bookingId || booking?.id;
 
   const getBookingStatus = (booking) =>
-    booking?.status ||
-    booking?.bookingStatus ||
-    "PENDING";
+    String(
+      booking?.status ||
+        booking?.bookingStatus ||
+        "PENDING"
+    ).toUpperCase();
+
+  const getPaymentStatus = (booking) =>
+    String(
+      booking?.paymentStatus ||
+        "PENDING"
+    ).toUpperCase();
 
   const closeDetails = () => {
     if (actionLoadingId !== null) {
@@ -71,70 +106,115 @@ export default function CustomerBookings() {
     setSelectedBooking(null);
   };
 
-  const handleCancelBooking = async (booking) => {
-  const bookingId = getBookingId(booking);
+  const handleCancelBooking = async (
+    booking
+  ) => {
+    const bookingId =
+      getBookingId(booking);
 
-  const remarks = window.prompt(
-    "Enter the reason for cancelling this booking"
-  );
+    const remarks = window.prompt(
+      "Enter the reason for cancelling this booking"
+    );
 
-  if (!remarks?.trim()) {
-    return;
-  }
+    if (!remarks?.trim()) {
+      return;
+    }
 
-  try {
-    setActionLoadingId(bookingId);
+    try {
+      setActionLoadingId(bookingId);
 
-    await bookingApi.cancel(bookingId, {
-      cancellationReason: "CUSTOMER_CANCELLED",
-      cancellationRemarks: remarks.trim(),
-    });
+      await bookingApi.cancel(
+        bookingId,
+        {
+          cancellationReason:
+            "CUSTOMER_CANCELLED",
 
-    toast.success("Booking cancelled successfully");
+          cancellationRemarks:
+            remarks.trim(),
+        }
+      );
+
+      toast.success(
+        "Booking cancelled successfully"
+      );
+
+      setSelectedBooking(null);
+
+      await load();
+    } catch (error) {
+      console.error(
+        "Cancel booking error:",
+        error.response?.data || error
+      );
+
+      toast.error(
+        getApiErrorMessage(
+          error,
+          "Unable to cancel the booking."
+        )
+      );
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handlePay = (booking) => {
+    const bookingId =
+      getBookingId(booking);
+
+    if (!bookingId) {
+      toast.error(
+        "Booking ID is missing."
+      );
+
+      return;
+    }
 
     setSelectedBooking(null);
 
-    await load();
-  } catch (error) {
-    console.error(
-      "Cancel booking error:",
-      error.response?.data
+    navigate(
+      `/customer/bookings/${bookingId}/payment`,
+      {
+        state: {
+          booking,
+        },
+      }
     );
-
-    toast.error(
-      getApiErrorMessage(
-        error,
-        "Unable to cancel the booking."
-      )
-    );
-  } finally {
-    setActionLoadingId(null);
-  }
-};
+  };
 
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="eyebrow">MY BOOKINGS</p>
+          <p className="eyebrow">
+            MY BOOKINGS
+          </p>
 
           <h1 className="mt-2 display-title">
             Track service requests
           </h1>
 
           <p className="mt-2 text-msp-secondary">
-            View booking information and track the progress of your services.
+            View booking information and
+            track the progress of your
+            services.
           </p>
         </div>
 
-        <Link to="/providers" className="btn-primary">
+        <Link
+          to="/providers"
+          className="btn-primary"
+        >
           Create booking
         </Link>
       </div>
 
       {error && (
         <div className="mt-6">
-          <ApiState message={error} onRetry={load} />
+          <ApiState
+            message={error}
+            onRetry={load}
+          />
         </div>
       )}
 
@@ -144,29 +224,44 @@ export default function CustomerBookings() {
         </p>
       )}
 
-      {!loading && !error && items.length === 0 && (
-        <div className="mt-6">
-          <EmptyState
-            title="No bookings yet"
-            message="Search for a provider and create your first booking."
-            action={
-              <Link className="btn-primary" to="/providers">
-                Find providers
-              </Link>
-            }
-          />
-        </div>
-      )}
+      {!loading &&
+        !error &&
+        items.length === 0 && (
+          <div className="mt-6">
+            <EmptyState
+              title="No bookings yet"
+              message="Search for a provider and create your first booking."
+              action={
+                <Link
+                  className="btn-primary"
+                  to="/providers"
+                >
+                  Find providers
+                </Link>
+              }
+            />
+          </div>
+        )}
 
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
         {items.map((booking) => {
-          const bookingId = getBookingId(booking);
-          const status = getBookingStatus(booking);
+          const bookingId =
+            getBookingId(booking);
+
+          const status =
+            getBookingStatus(booking);
+
+          const paymentStatus =
+            getPaymentStatus(booking);
 
           return (
             <article
               key={bookingId}
-              onClick={() => setSelectedBooking(booking)}
+              onClick={() =>
+                setSelectedBooking(
+                  booking
+                )
+              }
               className="card cursor-pointer p-5 transition duration-200 hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
@@ -184,19 +279,35 @@ export default function CustomerBookings() {
                   <p className="mt-2 text-sm text-msp-secondary">
                     Provider:{" "}
                     {booking.providerName ||
-                      `Provider #${booking.providerId || "N/A"}`}
+                      `Provider #${
+                        booking.providerId ||
+                        "N/A"
+                      }`}
                   </p>
                 </div>
 
-                <StatusBadge status={status} />
+                <div className="flex flex-col items-end gap-2">
+                  <StatusBadge
+                    status={status}
+                  />
+
+                  <PaymentStatusBadge
+                    status={
+                      paymentStatus
+                    }
+                  />
+                </div>
               </div>
 
               <div className="mt-5 space-y-3 text-sm text-msp-secondary">
                 <div className="flex items-center gap-2">
-                  <CalendarDays size={17} />
+                  <CalendarDays
+                    size={17}
+                  />
 
                   <span>
-                    {booking.scheduledDate || "Date not available"}
+                    {booking.scheduledDate ||
+                      "Date not available"}
                   </span>
                 </div>
 
@@ -204,7 +315,8 @@ export default function CustomerBookings() {
                   <Clock3 size={17} />
 
                   <span>
-                    {booking.scheduledTime || "Time not available"}
+                    {booking.scheduledTime ||
+                      "Time not available"}
                   </span>
                 </div>
 
@@ -221,7 +333,8 @@ export default function CustomerBookings() {
                       booking.state,
                     ]
                       .filter(Boolean)
-                      .join(", ") || "Location not available"}
+                      .join(", ") ||
+                      "Location not available"}
                   </span>
                 </div>
               </div>
@@ -231,7 +344,10 @@ export default function CustomerBookings() {
                 className="btn-secondary mt-5 w-full"
                 onClick={(event) => {
                   event.stopPropagation();
-                  setSelectedBooking(booking);
+
+                  setSelectedBooking(
+                    booking
+                  );
                 }}
               >
                 View booking details
@@ -244,11 +360,21 @@ export default function CustomerBookings() {
       {selectedBooking && (
         <BookingDetailsModal
           booking={selectedBooking}
-          actionLoadingId={actionLoadingId}
+          actionLoadingId={
+            actionLoadingId
+          }
           getBookingId={getBookingId}
-          getBookingStatus={getBookingStatus}
+          getBookingStatus={
+            getBookingStatus
+          }
+          getPaymentStatus={
+            getPaymentStatus
+          }
           onClose={closeDetails}
-          onCancel={handleCancelBooking}
+          onCancel={
+            handleCancelBooking
+          }
+          onPay={handlePay}
         />
       )}
     </div>
@@ -260,11 +386,19 @@ function BookingDetailsModal({
   actionLoadingId,
   getBookingId,
   getBookingStatus,
+  getPaymentStatus,
   onClose,
   onCancel,
+  onPay,
 }) {
-  const bookingId = getBookingId(booking);
-  const status = getBookingStatus(booking);
+  const bookingId =
+    getBookingId(booking);
+
+  const status =
+    getBookingStatus(booking);
+
+  const paymentStatus =
+    getPaymentStatus(booking);
 
   const isActionLoading =
     actionLoadingId === bookingId;
@@ -284,6 +418,13 @@ function BookingDetailsModal({
     "ACCEPTED",
   ].includes(status);
 
+  const canPay =
+    status === "COMPLETED" &&
+    paymentStatus !== "PAID";
+
+  const paymentCompleted =
+    paymentStatus === "PAID";
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -291,7 +432,9 @@ function BookingDetailsModal({
     >
       <div
         className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) =>
+          event.stopPropagation()
+        }
       >
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -305,15 +448,23 @@ function BookingDetailsModal({
                 "Service booking"}
             </h2>
 
-            <div className="mt-3">
-              <StatusBadge status={status} />
+            <div className="mt-3 flex flex-wrap gap-2">
+              <StatusBadge
+                status={status}
+              />
+
+              <PaymentStatusBadge
+                status={paymentStatus}
+              />
             </div>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            disabled={isActionLoading}
+            disabled={
+              isActionLoading
+            }
             className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gray-100 text-gray-700 transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Close booking details"
           >
@@ -329,20 +480,10 @@ function BookingDetailsModal({
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <DetailItem
               icon={UserRound}
-              label="Provider ID"
-              value={booking.providerId}
-            />
-
-            <DetailItem
-              icon={UserRound}
               label="Provider name"
-              value={booking.providerName}
-            />
-
-            <DetailItem
-              icon={UserRound}
-              label="Category ID"
-              value={booking.categoryId}
+              value={
+                booking.providerName
+              }
             />
 
             <DetailItem
@@ -365,21 +506,27 @@ function BookingDetailsModal({
             <DetailItem
               icon={CalendarDays}
               label="Scheduled date"
-              value={booking.scheduledDate}
+              value={
+                booking.scheduledDate
+              }
             />
 
             <DetailItem
               icon={Clock3}
               label="Scheduled time"
-              value={booking.scheduledTime}
+              value={
+                booking.scheduledTime
+              }
             />
 
             <DetailItem
               icon={IndianRupee}
               label="Estimated price"
               value={
-                booking.estimatedPrice !== undefined &&
-                booking.estimatedPrice !== null
+                booking.estimatedPrice !==
+                  undefined &&
+                booking.estimatedPrice !==
+                  null
                   ? `₹${booking.estimatedPrice}`
                   : null
               }
@@ -388,7 +535,7 @@ function BookingDetailsModal({
             <DetailItem
               icon={UserRound}
               label="Payment status"
-              value={booking.paymentStatus}
+              value={paymentStatus}
             />
 
             <DetailItem
@@ -427,7 +574,9 @@ function BookingDetailsModal({
               </p>
 
               <p className="mt-2 text-sm text-red-700">
-                {booking.rejectionReason}
+                {
+                  booking.rejectionReason
+                }
               </p>
             </div>
           )}
@@ -439,18 +588,51 @@ function BookingDetailsModal({
               </p>
 
               <p className="mt-2 text-sm text-red-700">
-                {booking.cancellationReason}
+                {
+                  booking.cancellationReason
+                }
               </p>
             </div>
           )}
         </section>
 
+        {canPay && (
+          <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5">
+            <h3 className="font-bold text-green-800">
+              Service completed
+            </h3>
+
+            <p className="mt-1 text-sm text-green-700">
+              Your service is completed.
+              You can now make the
+              payment.
+            </p>
+          </div>
+        )}
+
+        {paymentCompleted && (
+          <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5">
+            <h3 className="font-bold text-green-800">
+              Payment completed
+            </h3>
+
+            <p className="mt-1 text-sm text-green-700">
+              Payment for this booking
+              has already been completed.
+            </p>
+          </div>
+        )}
+
         <div className="mt-6 flex flex-wrap gap-3 border-t border-gray-200 pt-5">
           {canCancel && (
             <button
               type="button"
-              onClick={() => onCancel(booking)}
-              disabled={isActionLoading}
+              onClick={() =>
+                onCancel(booking)
+              }
+              disabled={
+                isActionLoading
+              }
               className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isActionLoading
@@ -459,10 +641,27 @@ function BookingDetailsModal({
             </button>
           )}
 
+          {canPay && (
+            <button
+              type="button"
+              onClick={() =>
+                onPay(booking)
+              }
+              disabled={
+                isActionLoading
+              }
+              className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Pay now
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onClose}
-            disabled={isActionLoading}
+            disabled={
+              isActionLoading
+            }
             className="btn-secondary disabled:cursor-not-allowed disabled:opacity-60"
           >
             Close
@@ -506,17 +705,34 @@ function DetailItem({
 
 function StatusBadge({ status }) {
   const normalizedStatus =
-    String(status || "PENDING").toUpperCase();
+    String(
+      status || "PENDING"
+    ).toUpperCase();
 
   const styles = {
-    CREATED: "bg-yellow-100 text-yellow-800",
-    PENDING: "bg-yellow-100 text-yellow-800",
-    ACCEPTED: "bg-blue-100 text-blue-800",
-    CONFIRMED: "bg-blue-100 text-blue-800",
-    IN_PROGRESS: "bg-purple-100 text-purple-800",
-    COMPLETED: "bg-green-100 text-green-800",
-    REJECTED: "bg-red-100 text-red-800",
-    CANCELLED: "bg-gray-200 text-gray-700",
+    CREATED:
+      "bg-yellow-100 text-yellow-800",
+
+    PENDING:
+      "bg-yellow-100 text-yellow-800",
+
+    ACCEPTED:
+      "bg-blue-100 text-blue-800",
+
+    CONFIRMED:
+      "bg-blue-100 text-blue-800",
+
+    IN_PROGRESS:
+      "bg-purple-100 text-purple-800",
+
+    COMPLETED:
+      "bg-green-100 text-green-800",
+
+    REJECTED:
+      "bg-red-100 text-red-800",
+
+    CANCELLED:
+      "bg-gray-200 text-gray-700",
   };
 
   return (
@@ -526,7 +742,51 @@ function StatusBadge({ status }) {
         "bg-gray-100 text-gray-700"
       }`}
     >
-      {normalizedStatus.replaceAll("_", " ")}
+      {normalizedStatus.replaceAll(
+        "_",
+        " "
+      )}
+    </span>
+  );
+}
+
+function PaymentStatusBadge({
+  status,
+}) {
+  const normalizedStatus =
+    String(
+      status || "PENDING"
+    ).toUpperCase();
+
+  const styles = {
+    PAID:
+      "bg-green-100 text-green-800",
+
+    PENDING:
+      "bg-orange-100 text-orange-800",
+
+    UNPAID:
+      "bg-orange-100 text-orange-800",
+
+    FAILED:
+      "bg-red-100 text-red-800",
+
+    REFUNDED:
+      "bg-blue-100 text-blue-800",
+  };
+
+  return (
+    <span
+      className={`inline-flex h-fit rounded-full px-3 py-1 text-xs font-bold ${
+        styles[normalizedStatus] ||
+        "bg-gray-100 text-gray-700"
+      }`}
+    >
+      Payment:{" "}
+      {normalizedStatus.replaceAll(
+        "_",
+        " "
+      )}
     </span>
   );
 }

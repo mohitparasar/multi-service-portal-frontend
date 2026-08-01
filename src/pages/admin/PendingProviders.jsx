@@ -27,14 +27,13 @@ export default function PendingProviders() {
   useEffect(() => { load() }, [])
 
   const decide = async (provider, action) => {
-    const id = provider.providerId ?? provider.id ?? provider.userId
-    if (!id) return toast.error('Provider id is missing')
-    setBusyId(`${action}-${id}`)
+    if (!provider.id) return toast.error('Provider id is missing')
+    setBusyId(`${action}-${provider.id}`)
     try {
-      if (action === 'approve') await adminApi.approveProvider(id)
-      else await adminApi.rejectProvider(id)
+      if (action === 'approve') await adminApi.approveProvider(provider.id)
+      else await adminApi.rejectProvider(provider.id)
       toast.success(action === 'approve' ? 'Provider approved' : 'Provider rejected')
-      setProviders((items) => items.filter((item) => (item.providerId ?? item.id ?? item.userId) !== id))
+      setProviders((items) => items.filter((item) => item.id !== provider.id))
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed')
     } finally {
@@ -47,26 +46,26 @@ export default function PendingProviders() {
 
   return <QueueShell onRefresh={load}>
     {providers.length === 0 ? <EmptyState title="No pending providers" message="Provider approval queue is clear."/> : <div className="grid gap-4">
-      {providers.map((provider) => {
-        const id = provider.providerId ?? provider.id ?? provider.userId
-        return <article key={id ?? provider.email} className="card p-5">
-          <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
-            <div>
-              <h2 className="text-xl font-bold text-msp-primary">{provider.name ?? provider.fullName ?? provider.email ?? 'Provider'}</h2>
-              <p className="mt-2 text-sm text-msp-muted">{provider.phone ?? provider.mobile ?? 'No phone provided'}</p>
-              <p className="mt-3 max-w-3xl text-msp-secondary">{provider.description ?? provider.bio ?? 'No description provided.'}</p>
-              <div className="mt-4 flex flex-wrap gap-2 text-sm">
-                <Badge label={`${provider.experience ?? 0} years experience`}/>
-                <Badge label={provider.approvalStatus ?? provider.status ?? 'PENDING'}/>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <button onClick={() => decide(provider, 'approve')} disabled={busyId === `approve-${id}`} className="btn-primary px-4 py-2"><Check size={17} className="mr-2"/>Approve</button>
-              <button onClick={() => decide(provider, 'reject')} disabled={busyId === `reject-${id}`} className="btn-secondary px-4 py-2"><X size={17} className="mr-2"/>Reject</button>
+      {providers.map((provider) => <article key={provider.id} className="card p-5">
+        <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
+          <div>
+            <h2 className="text-xl font-bold text-msp-primary">{provider.fullName ?? 'Provider'}</h2>
+            <p className="mt-2 text-sm text-msp-muted">{provider.phone ?? 'No phone provided'}</p>
+            <p className="mt-3 max-w-3xl text-msp-secondary">{provider.description ?? 'No description provided.'}</p>
+            <div className="mt-4 flex flex-wrap gap-2 text-sm">
+              <Badge label={`Auth user #${provider.authUserId ?? 'N/A'}`}/>
+              <Badge label={`${provider.experienceYears ?? 0} years experience`}/>
+              <Badge label={`${provider.averageRating ?? 0} rating`}/>
+              <Badge label={`${provider.totalJobsCompleted ?? 0} jobs completed`}/>
+              <Badge label={provider.approvalStatus ?? 'PENDING'}/>
             </div>
           </div>
-        </article>
-      })}
+          <div className="flex items-start gap-3">
+            <button onClick={() => decide(provider, 'approve')} disabled={busyId === `approve-${provider.id}`} className="btn-primary px-4 py-2"><Check size={17} className="mr-2"/>Approve</button>
+            <button onClick={() => decide(provider, 'reject')} disabled={busyId === `reject-${provider.id}`} className="btn-secondary px-4 py-2"><X size={17} className="mr-2"/>Reject</button>
+          </div>
+        </div>
+      </article>)}
     </div>}
   </QueueShell>
 }
